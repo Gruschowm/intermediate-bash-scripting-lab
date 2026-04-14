@@ -1,44 +1,73 @@
 #!/bin/bash
 
-# --- The Loop ---
-# This 'while true' loop ensures the menu returns after every command
+# --- 1. Help Feature (Command Line Arguments) ---
+# $1 represents the first word typed after the script name
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+    echo "Usage: ./sysinfo.sh"
+    echo "This tool provides a menu-driven interface to view system statistics"
+    echo "including OS info, disk usage, logged-in users, and top processes."
+    exit 0
+fi
+
+# --- Function for Formatting Headers ---
+# This makes it easier to add timestamps and borders to every section
+print_header() {
+    local title=$1
+    echo "========================================="
+    echo "  $title"
+    echo "  Generated on: $(date)"
+    echo "========================================="
+}
+
+# --- Main Menu Loop ---
 while true; do
-    echo "-------------------------------------"
-    echo "   SYSTEM INFORMATION TOOL - V2.0    "
-    echo "-------------------------------------"
+    echo ""
+    echo "Welcome, select one of the following options using the number keys:"
     echo "1: Show System Info"
     echo "2: Show Disk Usage"
     echo "3: Show Current Users"
-    echo "4: Exit"
-    echo "-------------------------------------"
+    echo "4: Show Top Processes"
+    echo "5: Exit"
+    echo ""
 
-    read -p "Enter your choice [1-4]: " choice
+    read -p "Selection: " choice
 
-    if [ "$choice" == "1" ]; then
-        echo "--- OS & System Info ---"
-        uname -a               # Kernel version and OS details
-        hostnamectl            # Detailed OS name and hostname
-        uptime -p              # How long the system has been running
-        
-    elif [ "$choice" == "2" ]; then
-        echo "--- Disk Usage ---"
-        # -h makes it human-readable (GB/MB instead of bytes)
-        df -h
-        
-    elif [ "$choice" == "3" ]; then
-        echo "--- Current Users & Activity ---"
-        # 'w' shows who is logged in and what they are doing
-        w
-        
-    elif [ "$choice" == "4" ]; then
-        echo "Exiting. Goodbye!"
-        break                  # 'break' exits the while loop
-    else
-        echo "Invalid selection, please try again."
-    fi
+    case $choice in
+        1)
+            print_header "SYSTEM INFO"
+            hostnamectl | grep -E "Static hostname|Operating System|Kernel"
+            uptime -p
+            ;;
+        2)
+            print_header "DISK USAGE"
+            df -h --total | grep -E "Filesystem|total"
+            ;;
+        3)
+            print_header "CURRENT USERS"
+            w
+            ;;
+        4)
+            print_header "TOP 5 PROCESSES (BY CPU)"
+            # ps command flags:
+            # -e (all processes), -o (custom output format)
+            # --sort=-pcpu (sort by CPU descending)
+            echo "+------+-------+--------+-------------+"
+            echo "| PID  | User  | CPU%   | Command     |"
+            echo "+------+-------+--------+-------------+"
+            ps -eo pid,user,pcpu,comm --sort=-pcpu | head -n 6 | tail -n 5 | awk '{printf "| %-4s | %-5s | %-6s | %-11s |\n", $1, $2, $3, $4}'
+            echo "+------+-------+--------+-------------+"
+            ;;
+        5)
+            echo "Exiting. Goodbye!"
+            break
+            ;;
+        *)
+            echo "Invalid selection. Please choose 1-5."
+            ;;
+    esac
 
-    # Optional: Pause before the menu clears/reappears
-    read -p "Press Enter to return to the menu..."
+    echo ""
+    read -p "Press Enter to return to menu..."
 done
 
 
