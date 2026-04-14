@@ -1,30 +1,44 @@
 #!/bin/bash
 
-# Title
-echo "=============================="
-echo "   System Information Tool"
-echo "=============================="
-echo "Welcome, select one of the following options using the number keys:"
-echo "1: Show System Info"
-echo "2: Show Disk Usage"
-echo "3: Show Current Users"
-echo "4: Exit"
+# --- The Loop ---
+# This 'while true' loop ensures the menu returns after every command
+while true; do
+    echo "-------------------------------------"
+    echo "   SYSTEM INFORMATION TOOL - V2.0    "
+    echo "-------------------------------------"
+    echo "1: Show System Info"
+    echo "2: Show Disk Usage"
+    echo "3: Show Current Users"
+    echo "4: Exit"
+    echo "-------------------------------------"
 
-# Prompt for input
-read -p "Enter choice [1-4]: " choice
+    read -p "Enter your choice [1-4]: " choice
 
-# Menu handling
-if [ "$choice" == "1" ]; then
-    echo "You selected Option 1: System Info"
-elif [ "$choice" == "2" ]; then
-    echo "You selected Option 2: Disk Usage"
-elif [ "$choice" == "3" ]; then
-    echo "You selected Option 3: Current Users"
-elif [ "$choice" == "4" ]; then
-    echo "Exiting..."
-    exit 0
-else
-    echo "Invalid option, please run again."
-fi
+    if [ "$choice" == "1" ]; then
+        echo "--- OS & System Info ---"
+        uname -a               # Kernel version and OS details
+        hostnamectl            # Detailed OS name and hostname
+        uptime -p              # How long the system has been running
+        
+    elif [ "$choice" == "2" ]; then
+        echo "--- Disk Usage ---"
+        # -h makes it human-readable (GB/MB instead of bytes)
+        df -h
+        
+    elif [ "$choice" == "3" ]; then
+        echo "--- Current Users & Activity ---"
+        # 'w' shows who is logged in and what they are doing
+        w
+        
+    elif [ "$choice" == "4" ]; then
+        echo "Exiting. Goodbye!"
+        break                  # 'break' exits the while loop
+    else
+        echo "Invalid selection, please try again."
+    fi
+
+    # Optional: Pause before the menu clears/reappears
+    read -p "Press Enter to return to the menu..."
+done
 
 
